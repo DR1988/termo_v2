@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Termo_v2", "Termo_v2\Termo_v2.cproj", "{BF9C3FC6-156E-4213-A533-EE65517A6102}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF9C3FC6-156E-4213-A533-EE65517A6102}.Debug|AVR.ActiveCfg = Debug|AVR
+		{BF9C3FC6-156E-4213-A533-EE65517A6102}.Debug|AVR.Build.0 = Debug|AVR
+		{BF9C3FC6-156E-4213-A533-EE65517A6102}.Release|AVR.ActiveCfg = Release|AVR
+		{BF9C3FC6-156E-4213-A533-EE65517A6102}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
