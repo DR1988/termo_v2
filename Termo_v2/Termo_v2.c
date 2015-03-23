@@ -15,7 +15,7 @@
 
 char s[2];//Массив для приема байтов
 int T1,T2,T,i=0,temp=0, count=0, j=0, k=0, sec=0, min=0, Val1, Val2, rpm1, rpm=400, count2=500, count3=25, buffer[10], buffer1[10], buffer2[10], buffer3[10], buffer4[10],buffer5[10];//счетчик принятых байтов
-int n, rpmi[20],Im,Tavrg,avr,OCR1A_Flag,OCR1B_Flag,Temp_I[20],l,click=0,butt_pos=0;
+int n, rpmi[20],Im,Tavrg,avr,OCR1A_Flag,OCR1B_Flag,Temp_I[20],l,click=0,butt_pos=0,click1=0,butt_pos1=0, tick=0;
 double Tavr[100];
 float  Uref=5.12,Km=0.0055,Ikm=0.000005,Tn,Ti,It,Pt=0.01,Itk=0.0005;;
 unsigned int U;
@@ -282,102 +282,7 @@ ISR(ADC_vect)
 		(Tavr[90]+Tavr[91]+Tavr[92]+Tavr[93]+Tavr[94])/100+(Tavr[95]+Tavr[96]+Tavr[97]+Tavr[98]+Tavr[99])/100);
 	}
 	
-	/*
-	if (avr>=100)
-	{	avr=0;
-		for (avr=0;avr<100;avr++)
-	{Tavrg=Tavrg+Tavr[avr];	}
-		//Tavrg=Tavrg/100;
-	avr=0;}*/
-	//Tinst=10*(((ADC*Uref/1024+17.0333)/6.11)*100-273);// умножаю на десять, чтобы сравнивать десятые доли
-	//Ti[temp]=(((ADC*Uref/1024+17.0333)/6.11)*100-273);
-	//T=10*(Ti[0]+Ti[1]+Ti[2]+Ti[3]+Ti[4]+Ti[5]+Ti[6]+Ti[7]+Ti[8]+Ti[9])/10;
-	//temp++;
-	
-	
-	//	if (temp>=10)
-//{temp=0;}
 
-
-
-/*
-if (temp==10)
-{
-	
-	if (T>=1.01*count3*10)
-	{
-		if (PORTA&(1<<PA0))
-		{
-			TCCR1A = TCCR1A&~(1<<COM1B1);
-			DDRA |= (1<<PA0);
-			PORTA =PORTA&~(1<<PA0);
-			DDRD |= (1<<PD4);
-			PORTD =PORTD&~(1<<PD4);
-			OCR1B = 0x00;
-			_delay_ms(200);
-		}
-		else
-		{
-			TCCR1A |=(1<<COM1A1);
-			DDRA |= (1<<PA1);
-			PORTA|= (1<<PA1);
-			DDRD|= (1<<PD5);
-			OCR1A = OCR1A+10; //to generate 20% duty cycle
-			if (OCR1A>=235)
-		{OCR1A=225;}
-		}
-	}
-	
-	
-	else if (T<=0.99*count3*10)
-	{
-		
-		if (PORTA&(1<<PA1))
-		{
-			TCCR1A = TCCR1A&~(1<<COM1A1);
-			DDRA |= (1<<PA1);
-			PORTA =PORTA&~(1<<PA1);
-			
-			DDRD |= (1<<PD5);
-			PORTD=PORTD&~(1<<PD5);
-			OCR1A = 0x00;
-			_delay_ms(200);
-		}
-		
-		else
-		{
-			TCCR1A|= (1<<COM1B1);
-			DDRA |= (1<<PA0);
-			PORTA|= (1<<PA0);
-			DDRD|= (1<<PD4);
-			OCR1B = OCR1B+10; //to generate 20% duty cycle
-			if (OCR1B>=245)
-		{OCR1B=225;}
-		}
-	}
-temp=0;}
-*/
-
-//*************переключаем каналы АЦП***************
-
-//	switch (ADMUX)
-//	{
-	//	case 0x00:
-	//	ADMUX=0x03;
-	//	U=100*ADC*Uref/1024;
-
-	//break;
-	
-	//		case 0x03:
-	
-	//	ADMUX=0x03;
-	//T=(((ADC*Uref/1024+17.0333)/6.11)*100-273);
-
-	//	break;
-	
-//	}
-//sei();
-//**************Завершение переключения каналов АЦП************
 
 ADCSRA|=1<<ADSC;
 
@@ -410,6 +315,28 @@ ISR(TIMER2_COMP_vect)
 			butt_pos=1;
 		}
 
+
+		switch(PINA&(1<<PC4))
+			{
+				case 0:
+			
+				if (butt_pos1==1)
+				{click1++;
+					butt_pos1=0;
+				}
+				if (butt_pos1==0)
+				{
+					click1=click1;
+				}
+				
+				case 16:
+				
+				
+				click1=click1;
+				butt_pos1=1;
+			}
+ 
+		
 		i++;
 			T1=Tavrg/100;
 			T2=Tavrg%100;
@@ -449,6 +376,15 @@ ISR(TIMER2_COMP_vect)
 		lcd_gotoxy(0,1);
 		itoa(count2, buffer1, 10);
 		itoa((100*count3-Tavrg)/*rpm1*/, buffer2, 10);
+		
+		if (click1%2==0)
+		{
+			lcd_puts("rpm : ");
+			//lcd_puts("   ");
+			lcd_puts(" off ");
+		} 
+		else
+		{
 		if (rpm1/1000==0)
 		{
 			lcd_puts("rpm : ");
@@ -465,11 +401,23 @@ ISR(TIMER2_COMP_vect)
 		lcd_puts(" ");
 		lcd_puts(buffer1);
 		
+		}	
 	
 		
 		
 		if (i==8)//было 8 - при 8 отчитываем секунду
-		{	
+		{
+			if (click1%2==0)
+			{DDRB=DDRB&~(1<<PB3);
+				PORTB=PORTB&~(1<<PB3);
+				i--;
+			} 
+			else
+			{
+				send_int_Uart(1);
+				send_Uart(13);
+				send_Uart(10);
+				DDRB=(1<<PB3);
 			i=0;
 			rpm1=60*count/10;
 			//rpmi[k]=rpm1;
@@ -479,146 +427,139 @@ ISR(TIMER2_COMP_vect)
 			Im-=rpmi[k];
 			rpmi[k]=rpm1;
 			Im+=rpm1;
-		//***********************//
+			//***********************//
 			
 			n=Km*(count2-rpm1)+Ikm*(20*count2-Im);
 			
-		//	send_int_Uart(Tavrg);
-		//	send_Uart(13);
-		//	send_Uart(10);
-				
+			//	send_int_Uart(Tavrg);
+			//	send_Uart(13);
+			//	send_Uart(10);
+			
 			if (count2==0)
-			{OCR0=0;}
+		{OCR0=0;}
 			else
 			{OCR0=OCR0+n;
-			if (OCR0>=100)
+				if (OCR0>=100)
 			{OCR0=80;}
 			}
-				if (OCR0<=0)
-				{OCR0=0;}
+			if (OCR0<=0)
+		{OCR0=0;}
 			
-	/*		if (rpm1>=count2)
+			/*		if (rpm1>=count2)
 			{
 				if (count2==0)
-				{OCR0=0;} 
+			{OCR0=0;}
 				else
 				{OCR0 = OCR0-n;
 				}
-				 		}	
+			}
 			else if (rpm1<count2)
 			{
-				OCR0 = OCR0+2; 
+				OCR0 = OCR0+2;
 			}
-		*/
+			*/
 			count=0;
 			PORTD=PORTD^(1<<PD6);
+			}
 			
-			
-		//	if (100*count3>=Tavrg)				//гребанны AVR GCC не знает signed
-		//		{
-					Tn=Pt*(100*count3-Tavrg);//+Itk*(20*100*count3-It);
-					Ti=(Itk*(20*100)*count3-Itk*It);///2000;
-		//			}		//поэтому меняем знак искусственно
+			//	if (100*count3>=Tavrg)				//гребанны AVR GCC не знает signed
+			//		{
+				
+					if (click%2==0)
+					{
+						DDRD  = DDRD &~(1<<PD4);
+						DDRD  = DDRD &~(1<<PD5);
+						PORTD = PORTD&~(1<<PD4);
+						PORTD = PORTD&~(1<<PD5);
+						DDRA  = DDRA &~(1<<PA0);
+						DDRA  = DDRA &~(1<<PA1);
+						PORTA = PORTA&~(1<<PA0);
+						PORTA = PORTA&~(1<<PA1);
+					}
+					else
+					{
+				Tn=Pt*(100*count3-Tavrg);//+Itk*(20*100*count3-It);
+				Ti=(Itk*(20*100)*count3-Itk*It);///2000;
+			//			}		//поэтому меняем знак искусственно
 		//		else{Tn=Pt*(Tavrg-100*count3);}//+Itk*(It-20*100*count3);}		//
-			
-			if (Tavrg>=(count3*100+5))
-			{
-				OCR1B_Flag=0;
-				if (OCR1A_Flag==0)
-				{
-					OCR1A_Flag++;
-					OCR1A = 0x7F;
-				}
-					
-				if (PORTA&(1<<PA0))
-				{
-					TCCR1A = TCCR1A&~(1<<COM1B1);
-					DDRA |= (1<<PA0);
-					PORTA =PORTA&~(1<<PA0);
-					DDRD |= (1<<PD4);
-					PORTD =PORTD&~(1<<PD4);
-					OCR1B = 0x00;
-					_delay_ms(60);
-				
-				}
-				else
-				{
-					TCCR1A |=(1<<COM1A1);
-					DDRA |= (1<<PA1);
-					PORTA|= (1<<PA1);
-					DDRD|= (1<<PD5);
-					//OCR1A = OCR1A+Tn;
-					if (OCR1A>=250)
-				{OCR1A=240;}
-				}
-			}
-			
-			
-			else if (Tavrg<=(count3*100-5))
-			{
-				OCR1A_Flag=0;
-				if (OCR1B_Flag==0)
-				{OCR1B_Flag++;
-					OCR1B = 0x84;
-				}
-				
-				if (PORTA&(1<<PA1))
-				{
-					TCCR1A = TCCR1A&~(1<<COM1A1);
-					DDRA |= (1<<PA1);
-					PORTA =PORTA&~(1<<PA1);
-					DDRD |= (1<<PD5);
-					PORTD=PORTD&~(1<<PD5);
-					OCR1A = 0x00;
-					_delay_ms(60);
-				}
-				
-				else
-				{
-					TCCR1A|= (1<<COM1B1);
-					DDRA |= (1<<PA0);
-					PORTA|= (1<<PA0);
-					DDRD|= (1<<PD4);
-					//OCR1B = OCR1B+Tn; //to generate 20% duty cycle
-					if (OCR1B>=245)
-				{OCR1B=235;}
-				}
-			}
-			/*
-			
-			send_Uart_str("Tn=");
-			if (Tn>=0)
-			{send_int_Uart(Tn);
-				send_Uart(13);
-				send_Uart(10);
-				
-			} 
-			else
-			{send_int_Uart(-Tn);
-				send_Uart(13);
-				send_Uart(10);
-				
-			}
-			send_Uart_str("Ti=");
-				send_int_Uart(Ti);
-			send_Uart(13);
-			send_Uart(10);
-			
-			send_Uart_str("It=");
-				send_int_Uart(It);
-				send_Uart(13);
-				send_Uart(10);
 		
-			send_Uart_str("20*100*count3-It=");
-			send_int_Uart(	100*count3-It);
+		if (Tavrg>=(count3*100+5))
+		{
+			OCR1B_Flag=0;
+			if (OCR1A_Flag==0)
+			{
+				OCR1A_Flag++;
+				OCR1A = 0x7F;
+			}
+			
+			if (PORTA&(1<<PA0))
+			{
+				TCCR1A = TCCR1A&~(1<<COM1B1);
+				DDRA |= (1<<PA0);
+				PORTA =PORTA&~(1<<PA0);
+				DDRD |= (1<<PD4);
+				PORTD =PORTD&~(1<<PD4);
+				OCR1B = 0x00;
+				_delay_ms(60);
+				
+			}
+			else
+			{
+				TCCR1A |=(1<<COM1A1);
+				DDRA |= (1<<PA1);
+				PORTA|= (1<<PA1);
+				DDRD|= (1<<PD5);
+				//OCR1A = OCR1A+Tn;
+				if (OCR1A>=250)
+			{OCR1A=240;}
+			}
+		}
+		
+		
+		else if (Tavrg<=(count3*100-5))
+		{
+			OCR1A_Flag=0;
+			if (OCR1B_Flag==0)
+			{OCR1B_Flag++;
+				OCR1B = 0x84;
+			}
+			
+			if (PORTA&(1<<PA1))
+			{
+				TCCR1A = TCCR1A&~(1<<COM1A1);
+				DDRA |= (1<<PA1);
+				PORTA =PORTA&~(1<<PA1);
+				DDRD |= (1<<PD5);
+				PORTD=PORTD&~(1<<PD5);
+				OCR1A = 0x00;
+				_delay_ms(60);
+			}
+			
+			else
+			{
+				TCCR1A|= (1<<COM1B1);
+				DDRA |= (1<<PA0);
+				PORTA|= (1<<PA0);
+				DDRD|= (1<<PD4);
+				//OCR1B = OCR1B+Tn; //to generate 20% duty cycle
+				if (OCR1B>=245)
+			{OCR1B=235;}
+			}
+		}
+			
+			/*
+			send_int_Uart(tick++);
 			send_Uart(13);
 			send_Uart(10);
 			*/
-			
+			if (tick==59)
+			{tick=0;
+			}
+			/*
 			send_int_Uart(Tavrg);
 			send_Uart(13);
 			send_Uart(10);
-				
+				*/
 			
 			sec++;
 			if (sec==15)
@@ -637,12 +578,20 @@ ISR(TIMER2_COMP_vect)
 				else if (Tavrg<(count3*100-5))	
 					{OCR1B = OCR1B+Tn;}
 			}
+			
+					}			
 		}
 	}
 }
 
 ISR(INT2_vect)
 {
+	if (click%2==0)
+	{
+	} 
+	else
+	{
+	
 	
 	switch(PINC&(1<<PC7))
 	{
@@ -679,7 +628,7 @@ ISR(INT2_vect)
 */
 	//PORTD=PORTD^(1<<PD6);
 }
-
+	}
 
 ISR(INT1_vect)
 {
@@ -689,6 +638,11 @@ ISR(INT1_vect)
 
 ISR(INT0_vect)
 {
+	if (click1%2==0)
+	{
+	} 
+	else
+	{
 	
 	switch(PIND&(1<<PD7))
 	{
@@ -725,7 +679,7 @@ ISR(INT0_vect)
 */
 	//PORTD=PORTD^(1<<PD6);
 }
-
+}
 int main(void)
 {
 	
